@@ -37,6 +37,7 @@ async function run() {
         const bookingCollection = client.db('travelBuddyDB').collection('bookings');
 
         // SERVICES related API
+        // GET all services
         app.get('/services', async (req, res) => {
             try {
                 let queryObj = {};
@@ -54,6 +55,30 @@ async function run() {
 
                 const cursor = serviceCollection.find(queryObj).limit(limit);
                 const result = await cursor.toArray();
+                res.send(result);
+            } catch (error) {
+                console.log(error);
+            }
+        });
+        // GET service by id
+        app.get('/services/:id', async (req, res) => {
+            try {
+                const id = req.params.id;
+                const query = { _id: new ObjectId(id) }
+
+                const result = await serviceCollection.findOne(query);
+                res.send(result);
+            } catch (error) {
+                console.log(error);
+            }
+        });
+
+        // BOOKINGS related API
+        app.post('/bookings', async (req, res) => {
+            try {
+                const booking = req.body;
+                console.log(booking);
+                const result = await bookingCollection.insertOne(booking);
                 res.send(result);
             } catch (error) {
                 console.log(error);
