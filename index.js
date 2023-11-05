@@ -40,18 +40,19 @@ async function run() {
         app.get('/services', async (req, res) => {
             try {
                 let queryObj = {};
+
                 const serviceName = req.query.serviceName;
-                console.log(serviceName);
+                const limit = parseInt(req.query.showLimit);
+                console.log(serviceName, limit);
 
                 if (serviceName) {
                     // set a searchPattern with $regex to find case-insensitive service name.
                     const searchPattern = new RegExp(serviceName, 'i');
                     queryObj.service_name = { $regex: searchPattern }
                 }
-
                 // db.InspirationalWomen.find({ first_name: { $regex: /serviceName/i } })
 
-                const cursor = serviceCollection.find(queryObj);
+                const cursor = serviceCollection.find(queryObj).limit(limit);
                 const result = await cursor.toArray();
                 res.send(result);
             } catch (error) {
