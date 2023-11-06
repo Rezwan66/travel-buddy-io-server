@@ -44,7 +44,8 @@ async function run() {
 
                 const serviceName = req.query.serviceName;
                 const limit = parseInt(req.query.showLimit);
-                console.log(serviceName, limit);
+                const provider_email = req.query.email;
+                console.log(serviceName, limit, provider_email);
 
                 if (serviceName) {
                     // set a searchPattern with $regex to find case-insensitive service name.
@@ -52,6 +53,10 @@ async function run() {
                     queryObj.service_name = { $regex: searchPattern }
                 }
                 // db.InspirationalWomen.find({ first_name: { $regex: /serviceName/i } })
+
+                if (provider_email) {
+                    queryObj.provider_email = provider_email;
+                }
 
                 const cursor = serviceCollection.find(queryObj).limit(limit);
                 const result = await cursor.toArray();
@@ -84,6 +89,19 @@ async function run() {
                 console.log(error);
             }
         })
+        // DELETE a service
+        app.delete("/services/:id", async (req, res) => {
+            try {
+                const id = req.params.id;
+                // console.log(id);
+                const query = { _id: new ObjectId(id) };
+                // console.log(query);
+                const result = await serviceCollection.deleteOne(query);
+                res.send(result);
+            } catch (error) {
+                console.log(error);
+            }
+        });
 
         // BOOKINGS related API
         // GET all bookings
