@@ -72,8 +72,23 @@ async function run() {
                 console.log(error);
             }
         });
+        // POST a new service
+        app.post('/services', async (req, res) => {
+            try {
+                const service = req.body;
+                console.log(service);
+                const result = await serviceCollection.insertOne(service);
+                res.send(result);
+
+            } catch (error) {
+                console.log(error);
+            }
+        })
 
         // BOOKINGS related API
+        // GET all bookings
+
+        // CREATE bookings
         app.post('/bookings', async (req, res) => {
             try {
                 const booking = req.body;
