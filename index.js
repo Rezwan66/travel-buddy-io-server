@@ -45,7 +45,7 @@ async function run() {
                 const serviceName = req.query.serviceName;
                 const limit = parseInt(req.query.showLimit);
                 const provider_email = req.query.email;
-                console.log(serviceName, limit, provider_email);
+                // console.log(serviceName, limit, provider_email);
 
                 if (serviceName) {
                     // set a searchPattern with $regex to find case-insensitive service name.
@@ -102,6 +102,25 @@ async function run() {
                 console.log(error);
             }
         });
+        // EDIT a service
+        app.put('/services/:id', async (req, res) => {
+            try {
+                const id = req.params.id;
+                const filter = { _id: new ObjectId(id) };
+                const service = req.body;
+                const updateDoc = {
+                    $set: {
+                        ...service,
+                    },
+                };
+                console.log(filter, service, updateDoc);
+                const result = await serviceCollection.updateOne(filter, updateDoc);
+                res.send(result);
+
+            } catch (error) {
+                console.log(error);
+            }
+        })
 
         // BOOKINGS related API
         // GET all bookings
