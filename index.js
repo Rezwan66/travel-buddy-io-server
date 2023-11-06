@@ -124,7 +124,28 @@ async function run() {
 
         // BOOKINGS related API
         // GET all bookings
+        app.get('/bookings', async (req, res) => {
+            try {
+                let queryObj = {};
+                const userEmail = req.query?.userEmail;
+                const providerEmail = req.query?.providerEmail;
 
+                if (userEmail) {
+                    queryObj.user_email = userEmail;
+                }
+                if (providerEmail) {
+                    queryObj.provider_email = providerEmail;
+                }
+                console.log(userEmail, queryObj, providerEmail);
+
+                const cursor = bookingCollection.find(queryObj);
+                const result = await cursor.toArray();
+                res.send(result);
+
+            } catch (error) {
+                console.log(error);
+            }
+        })
         // CREATE bookings
         app.post('/bookings', async (req, res) => {
             try {
