@@ -157,6 +157,20 @@ async function run() {
                 console.log(error);
             }
         })
+        app.patch('/bookings/:id', async (req, res) => {
+            const id = req.params.id;
+            const bookingStatus = req.body;
+            console.log(id, bookingStatus);
+
+            const filter = { _id: new ObjectId(id) };
+            const updatedDoc = {
+                $set: {
+                    status: bookingStatus.status
+                },
+            };
+            const result = await bookingCollection.updateOne(filter, updatedDoc);
+            res.send(result);
+        })
 
     } finally {
         // Ensures that the client will close when you finish/error
