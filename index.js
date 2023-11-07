@@ -172,7 +172,7 @@ async function run() {
                 let queryObj = {};
                 const userEmail = req.query?.userEmail;
                 const providerEmail = req.query?.providerEmail;
-                console.log('token owner info', req.user);
+                // console.log('token owner info', req.user);
                 if (req.user.email !== providerEmail && req.user.email !== userEmail) {
                     return res.status(403).send({ message: 'FORBIDDEN ACCESS' })
                 }
@@ -193,10 +193,10 @@ async function run() {
             }
         })
         // CREATE bookings
-        app.post('/bookings', async (req, res) => {
+        app.post('/bookings', verifyToken, async (req, res) => {
             try {
                 const booking = req.body;
-                console.log(booking);
+                // console.log(booking);
                 const result = await bookingCollection.insertOne(booking);
                 res.send(result);
             } catch (error) {
@@ -204,7 +204,7 @@ async function run() {
             }
         })
         // UPDATE status of booking
-        app.patch('/bookings/:id', async (req, res) => {
+        app.patch('/bookings/:id', verifyToken, async (req, res) => {
             try {
                 const id = req.params.id;
                 const bookingStatus = req.body;
