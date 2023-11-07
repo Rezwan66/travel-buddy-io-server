@@ -23,8 +23,17 @@ const logger = (req, res, next) => {
 
 const verifyToken = (req, res, next) => {
     const token = req.cookies?.token;
-    console.log('token in the middleware', token);
-    next();
+    // console.log('token in the middleware', token);
+    if (!token) {
+        return res.status(401).send({ message: 'UNAUTHORIZED ACCESS' })
+    }
+    jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
+        if (err) {
+            return res.status(401).send({ message: 'UNAUTHORIZED ACCESS' })
+        }
+        req.user = decoded;
+        next();
+    })
 }
 
 // MONGO DB
@@ -100,7 +109,7 @@ async function run() {
             }
         });
         // GET service by id
-        app.get('/services/:id', async (req, res) => {
+        app.get('/services/:id', verifyToken, async (req, res) => {
             try {
                 const id = req.params.id;
                 const query = { _id: new ObjectId(id) }
@@ -112,10 +121,10 @@ async function run() {
             }
         });
         // POST a new service
-        app.post('/services', async (req, res) => {
+        app.post('/services', verifyToken, async (req, res) => {
             try {
                 const service = req.body;
-                console.log(service);
+                // console.log(service);
                 const result = await serviceCollection.insertOne(service);
                 res.send(result);
 
@@ -124,7 +133,7 @@ async function run() {
             }
         })
         // DELETE a service
-        app.delete("/services/:id", async (req, res) => {
+        app.delete("/services/:id", verifyToken, async (req, res) => {
             try {
                 const id = req.params.id;
                 // console.log(id);
@@ -137,7 +146,7 @@ async function run() {
             }
         });
         // EDIT a service
-        app.put('/services/:id', async (req, res) => {
+        app.put('/services/:id', verifyToken, async (req, res) => {
             try {
                 const id = req.params.id;
                 const filter = { _id: new ObjectId(id) };
@@ -163,8 +172,10 @@ async function run() {
                 let queryObj = {};
                 const userEmail = req.query?.userEmail;
                 const providerEmail = req.query?.providerEmail;
-                // console.log('cookies from bookings api', req.cookies);
-
+                console.log('token owner info', req.user);
+                if (req.user.email !== providerEmail && req.user.email !== userEmail) {
+                    return res.status(403).send({ message: 'FORBIDDEN ACCESS' })
+                }
                 if (userEmail) {
                     queryObj.user_email = userEmail;
                 }
