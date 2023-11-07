@@ -15,6 +15,18 @@ app.use(cors({
 app.use(express.json());
 app.use(cookieParser());
 
+// my_middleware
+const logger = (req, res, next) => {
+    console.log('log info: ', req.method, req.url);
+    next();
+}
+
+const verifyToken = (req, res, next) => {
+    const token = req.cookies?.token;
+    console.log('token in the middleware', token);
+    next();
+}
+
 // MONGO DB
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.zjzxbzp.mongodb.net/?retryWrites=true&w=majority`;
@@ -40,9 +52,9 @@ async function run() {
         const bookingCollection = client.db('travelBuddyDB').collection('bookings');
 
         // JWT related api
-        app.post('/jwt', async (req, res) => {
+        app.post('/jwt', logger, async (req, res) => {
             const user = req.body;
-            console.log('user for token', user);
+            // console.log('user for token', user);
             const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1h' });
             res.cookie('token', token, {
                 httpOnly: true,
@@ -52,9 +64,9 @@ async function run() {
                 .send({ success: true });
         })
 
-        app.post('/logout', async (req, res) => {
+        app.post('/logout', logger, async (req, res) => {
             const user = req.body;
-            console.log('logging out', user);
+            // console.log('logging out', user);
             res.clearCookie('token', { maxAge: 0 }).send({ success: true });
         })
 
@@ -146,11 +158,12 @@ async function run() {
 
         // BOOKINGS related API
         // GET all bookings
-        app.get('/bookings', async (req, res) => {
+        app.get('/bookings', logger, verifyToken, async (req, res) => {
             try {
                 let queryObj = {};
                 const userEmail = req.query?.userEmail;
                 const providerEmail = req.query?.providerEmail;
+                // console.log('cookies from bookings api', req.cookies);
 
                 if (userEmail) {
                     queryObj.user_email = userEmail;
@@ -158,7 +171,7 @@ async function run() {
                 if (providerEmail) {
                     queryObj.provider_email = providerEmail;
                 }
-                console.log(userEmail, queryObj, providerEmail);
+                // console.log(userEmail, queryObj, providerEmail);
 
                 const cursor = bookingCollection.find(queryObj);
                 const result = await cursor.toArray();
