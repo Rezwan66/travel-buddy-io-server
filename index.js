@@ -9,7 +9,10 @@ const port = process.env.PORT || 5000;
 
 // middleware
 app.use(cors({
-    origin: ['http://localhost:5173'],
+    origin: [
+        //'http://localhost:5173', 
+        'https://travel-buddy-io.web.app',
+        'https://travel-buddy-io.firebaseapp.com'],
     credentials: true
 }));
 app.use(express.json());
@@ -173,9 +176,10 @@ async function run() {
                 const userEmail = req.query?.userEmail;
                 const providerEmail = req.query?.providerEmail;
                 // console.log('token owner info', req.user);
-                if (req.user.email !== providerEmail && req.user.email !== userEmail) {
-                    return res.status(403).send({ message: 'FORBIDDEN ACCESS' })
-                }
+                // req.user.email !== providerEmail && req.user.email !== userEmail XXX
+                // if (req.user.email !== providerEmail) {
+                //     return res.status(403).send({ message: 'FORBIDDEN ACCESS' })
+                // }
                 if (userEmail) {
                     queryObj.user_email = userEmail;
                 }
